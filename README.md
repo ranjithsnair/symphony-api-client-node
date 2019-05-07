@@ -79,6 +79,14 @@ Create a config.json file in your project.  Below is a sample configuration whic
 
 # Release Notes
 
+## 1.0.4
+- Support for multi-proxy configuration for Pod, Agent & KeyManager hosts.
+- Added Firehose 2.0 service endpoints.
+- Introduction of Request client library to handle API requests.
+- Fix malformed proxyURL when using username and password authentication.
+- Add support for Form Data requests.
+- Updates to support certificate authentication using PFX formatted file.
+
 ## 1.0.3
 - Fix to handle support for PKCS12 certificate files
 - Enhancement for Proxy Support. Allow configuring pod, agent and key manager proxies independently.
