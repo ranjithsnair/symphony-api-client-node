@@ -12,6 +12,8 @@ jest.mock('../../lib/SymBotAuth', () => ({
   sessionAuthToken: 'session-token',
   kmAuthToken: 'key-manager-token',
 }))
+jest.mock('../../lib/DatafeedEventsService')
+
 const https = require('https')
 const nock = require('nock')
 const SymBotClient = require('../../lib/SymBotClient')
@@ -58,11 +60,6 @@ describe('SymBotClient', () => {
     ['sendConnectionRequest', [], 'post', '/pod/v1/connnection/create'],
     ['removeConnection', ['abc123'], 'post', '/pod/v1/connnection/user/abc123/remove'],
     ['getConnectionRequestStatus', ['abc123'], 'get', '/pod/v1/connnection/user/abc123/info'],
-
-    // DatafeedClient
-
-    // getDatafeedEventsService
-    // stopDatafeedEventsService
 
     // FirehoseClient
 
@@ -164,6 +161,49 @@ describe('SymBotClient', () => {
       return expect(SymBotClient[methodName](...args)).rejects.toEqual({
         status: 'error',
       })
+    })
+  })
+
+  describe('#getDatafeedEventsService', () => {
+    it('supports old function signature', () => {
+      const messageHandler = jest.fn()
+      const feed = SymBotClient.getDatafeedEventsService(messageHandler)
+
+      // call bound handler function
+      feed.on.mock.calls[0][1]('hello')
+      expect(messageHandler).toHaveBeenCalledWith('MESSAGE_RECEIVED', 'hello')
+
+      expect(feed.start).toHaveBeenCalledWith(undefined)
+    })
+
+    it('supports new function signature', () => {
+      const feedId = 'abc123'
+      const onMessage = jest.fn()
+      const onError = jest.fn()
+      const feed = SymBotClient.getDatafeedEventsService({onMessage, onError, feedId})
+
+      expect(feed.start).toHaveBeenCalledWith(feedId)
+      expect(feed.on).toHaveBeenCalledWith('message', onMessage)
+      expect(feed.on).toHaveBeenCalledWith('error', onError)
+    })
+
+    it('allows errorHandler and feedId to be omitted', () => {
+      const onMessage = jest.fn()
+      const feed = SymBotClient.getDatafeedEventsService({onMessage})
+
+      expect(feed.start).toHaveBeenCalledWith(undefined)
+      expect(feed.on).toHaveBeenCalledWith('message', onMessage)
+      expect(feed.on).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('#stopDatafeedEventsService', () => {
+    it('stops instance', () => {
+      jest.spyOn(console, 'warn').mockImplementationOnce(() => {})
+      const feed = SymBotClient.getDatafeedEventsService(jest.fn())
+      SymBotClient.stopDatafeedEventsService()
+      expect(feed.stop).toHaveBeenCalled()
+      expect(console.warn).toHaveBeenCalled()
     })
   })
 })

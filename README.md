@@ -3,28 +3,35 @@ Symphony API Client for NodeJS
 
 ## Installation
 
-``npm install --save symphony-api-client-node``
+`npm install --save symphony-api-client-node`
 
 ## Usage
 
 ```javascript
-const Symphony = require('symphony-api-client-node');
+const Symphony = require('symphony-api-client-node')
 
-const botHearsSomething = ( event, messages ) => {
-  messages.forEach( (message, index) => {
-    console.log( 'The BOT heard "' + message.messageText +'" from ' + message.initiator.user.displayName );
+const onMessage = messages => {
+  messages.forEach(message => {
+    console.log(
+      'The BOT heard "' + message.messageText + '" from ' + message.initiator.user.displayName
+    )
   })
 }
 
-Symphony.initBot(__dirname + '/config.json').then( (symAuth) => {
-  Symphony.getDatafeedEventsService( botHearsSomething );
+const onError = error => {
+  console.error('Error reading data feed', error)
+}
+
+Symphony.initBot(__dirname + '/config.json').then(() => {
+  Symphony.getDatafeedEventsService({ onMessage, onError })
 })
 ```
+
 ## Configuration
+
 The `config.json` file is described on the [Configuration page](https://symphony-developers.symphony.com/docs/configuration-1) of the Symphony Developer Guide.
 
 Create a config.json file in your project.  Below is a sample configuration which includes the properties that can be configured:
-
 
 ```json5
 {
@@ -80,15 +87,53 @@ Create a config.json file in your project.  Below is a sample configuration whic
 }
 ```
 
+## Datafeed resuming
+
+Datafeeds buffer events on the agent up to a small limit. This allows bots to be restarted without missing any events,
+provided the datafeed ID is persisted and supplied when reconnecting.
+
+```javascript
+const fs = require('fs')
+const localFile = '/path/to/writable/file' // <- change this
+
+const loadId = () => fs.readFileSync(localFile, { encoding: 'utf-8', flag: 'a+' })
+const saveId = id => fs.writeFile(localFile, id, err => err && console.error(err))
+
+const feed = Symphony.getDatafeedEventsService({
+  onMessage,
+  onError,
+  onCreated: saveId,
+  feedId: loadId(),
+})
+```
+
+This simple example assumes that the file system is persisted across restarts which is not always the case
+(e.g. Docker containers). It is recommended to persist the datafeed ID to a database instead if available.
+
+### Shutting down a bot
+
+There is a known issue that can cause messages to be lost when stopping and resuming a datafeed.
+To avoid this, the datafeed service must hook into Node's exit events and prevent the process
+from exiting until the data feed has closed cleanly (up to 30 seconds). This is done automatically
+if the `NODE_ENV` environment variable is set to 'production' _and_ a datafeed 'created' listener
+has been registered (see above). In other cases the behaviour can be opted into by calling
+`registerShutdownHooks()` on the feed instance.
+
+See [Express Best Practices](https://expressjs.com/en/advanced/best-practice-performance.html#set-node_env-to-production)
+for examples of how to set environment variables.
+
 # Release Notes
 
 ## 1.0.4
-- Support for multi-proxy configuration for Pod, Agent & KeyManager hosts.
-- Added Firehose 2.0 service endpoints.
-- Introduction of Request client library to handle API requests.
 - Fix malformed proxyURL when using username and password authentication.
-- Add support for Form Data requests.
-- Updates to support certificate authentication using PFX formatted file.
+- Enhancement for resuming an existing datafeed. If upgrading to the new `getDatafeedEventsService` method signature,
+  note that the new `onMessage` handler is passed a single `messages` parameter.
+- Rewrite of DatafeedEventsService. Allowing for better management of datafeeds including,
+ - restarting an existing datafeed
+ - reporting the ID of a new datafeed
+ - reporting when the datafeed has errored
+ - reporting when the datafeed has stopped cleanly
+ - preventing the node process from exiting until datafeed has stopped cleanly
 
 ## 1.0.3
 - Fix to handle support for PKCS12 certificate files
