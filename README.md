@@ -124,6 +124,9 @@ for examples of how to set environment variables.
 
 # Release Notes
 
+## 1.0.5
+- Addition of Firehose 2.0 Service.  Note the new configuration option in config.json for firehoseType.
+
 ## 1.0.4
 - Fix malformed proxyURL when using username and password authentication.
 - Enhancement for resuming an existing datafeed. If upgrading to the new `getDatafeedEventsService` method signature,
