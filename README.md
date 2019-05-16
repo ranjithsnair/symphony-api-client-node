@@ -57,7 +57,7 @@ Create a config.json file in your project.  Below is a sample configuration whic
     "botCertPassword": "bot-cert-password",
 
     // For Firehose Services, (either 1 or 2)
-    firehoseType: ""
+    "firehoseType": ""
 
     // For extension apps only
     "appId": "",
