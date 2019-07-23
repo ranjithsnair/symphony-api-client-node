@@ -3,12 +3,12 @@ jest.mock('../../lib/SymConfigLoader', () => ({
     agentHost: 'agent.example.com',
     getAgentHost: async () => 'agent.example.com',
     rotateAgent: async () => { }
-  },
+  }
 }))
 jest.mock('../../lib/SymBotAuth', () => ({
   sessionAuthToken: 'session-token',
   kmAuthToken: 'key-manager-token',
-  botUser: { displayName: 'test' },
+  botUser: { displayName: 'test' }
 }))
 
 const nock = require('nock')
@@ -21,7 +21,7 @@ const mockBody = [
     payload: {
       messageSent: {
         message: {
-          message: '<div data-format="PresentationML" data-version="2.0">Hello World</div>',
+          message: '<div data-format='PresentationML' data-version='2.0'>Hello World</div>',
         },
       },
     },
@@ -40,7 +40,7 @@ const mockBody = [
 
 const parsedMessages = [
   {
-    message: '<div data-format="PresentationML" data-version="2.0">Hello World</div>',
+    message: '<div data-format='PresentationML' data-version='2.0'>Hello World</div>',
     messageText: 'Hello World',
   },
 ]

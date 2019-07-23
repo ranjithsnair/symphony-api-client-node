@@ -1,7 +1,7 @@
 const SymBotClient = require('../../lib/SymBotClient')
 
-jest.mock('fs');
-const mockFs = require('fs');
+jest.mock('fs')
+const mockFs = require('fs')
 
 jest.mock('../../lib/SymBotAuth', () => ({
   authenticate: jest.fn(() => {
@@ -9,17 +9,17 @@ jest.mock('../../lib/SymBotAuth', () => ({
       resolve({
         sessionAuthToken: 'session-token',
         kmAuthToken: 'key-manager-token'
-      });
-    });
+      })
+    })
   })
-}));
+}))
 
 const mainMockConfig = {
   agentHost: 'agent.example.com',
   agentPort: 443,
   podHost: 'pod.example.com',
-  podPort: 443,
-};
+  podPort: 443
+}
 const lbMockConfig = {
   loadBalancing: {
     method: 'random',
@@ -30,13 +30,12 @@ const lbMockConfig = {
     'srv2.symphony.com',
     'srv3.symphony.com'
   ]
-};
+}
 
 describe('SymLoadBalancerConfigLoader', () => {
-
   beforeAll(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
   it('configues lb', () => {
     mockFs.readFile = jest.fn()
@@ -45,16 +44,16 @@ describe('SymLoadBalancerConfigLoader', () => {
       })
       .mockImplementationOnce((path, cb) => {
         return cb(null, JSON.stringify(lbMockConfig))
-      });
+      })
 
     return SymBotClient.initBot('a-path', 'b-path').then(symAuth => {
-      expect(mockFs.readFile).toHaveBeenCalledWith('a-path', expect.any(Function));
+      expect(mockFs.readFile).toHaveBeenCalledWith('a-path', expect.any(Function))
 
-      expect(symAuth.config.podHost).toEqual(mainMockConfig.podHost);
+      expect(symAuth.config.podHost).toEqual(mainMockConfig.podHost)
 
-      expect(symAuth.config.loadBalancing.method).toEqual(lbMockConfig.loadBalancing.method);
-      expect(symAuth.config.loadBalancing.method).toEqual(lbMockConfig.loadBalancing.method);
-      expect(symAuth.config.agentServers.length).toEqual(lbMockConfig.agentServers.length);
-    });
-  });
-});
+      expect(symAuth.config.loadBalancing.method).toEqual(lbMockConfig.loadBalancing.method)
+      expect(symAuth.config.loadBalancing.method).toEqual(lbMockConfig.loadBalancing.method)
+      expect(symAuth.config.agentServers.length).toEqual(lbMockConfig.agentServers.length)
+    })
+  })
+})

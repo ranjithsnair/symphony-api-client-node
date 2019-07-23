@@ -8,11 +8,11 @@ const mockConfig = {
 }
 
 jest.mock('../../lib/SymConfigLoader', () => ({
-  SymConfig: mockConfig,
+  SymConfig: mockConfig
 }))
 jest.mock('../../lib/SymBotAuth', () => ({
   sessionAuthToken: 'session-token',
-  kmAuthToken: 'key-manager-token',
+  kmAuthToken: 'key-manager-token'
 }))
 jest.mock('../../lib/DatafeedEventsService')
 
@@ -36,7 +36,7 @@ describe('SymBotClient', () => {
       'streamMembers',
       ['abc123'],
       'get',
-      '/pod/v1/admin/stream/abc123/membership/list?skip=0&limit=1000',
+      '/pod/v1/admin/stream/abc123/membership/list?skip=0&limit=1000'
     ],
     ['importMessages', [['one', 'two']], 'post', '/agent/v4/message/import'],
     ['suppressMessage', ['abc123'], 'post', '/pod/v1/admin/messagesuppression/abc123/suppress'],
@@ -55,7 +55,7 @@ describe('SymBotClient', () => {
       'getConnections',
       ['dummy', 'abc123'],
       'get',
-      '/pod/v1/connnection/list?status=all?userIds=abc123',
+      '/pod/v1/connnection/list?status=all?userIds=abc123'
     ],
     ['acceptConnectionRequest', [], 'post', '/pod/v1/connnection/accept'],
     ['rejectConnectionRequest', [], 'post', '/pod/v1/connnection/reject'],
@@ -96,7 +96,7 @@ describe('SymBotClient', () => {
       'getSignalSubscribers',
       ['abc123'],
       'get',
-      '/agent/v1/signals/abc123/subscribers?skip=0&limit=50',
+      '/agent/v1/signals/abc123/subscribers?skip=0&limit=50'
     ],
 
     // StreamsClient
@@ -120,36 +120,36 @@ describe('SymBotClient', () => {
       'getUserFromEmail',
       ['example@example.com', true],
       'get',
-      '/pod/v2/user?email=example@example.com&local=true',
+      '/pod/v2/user?email=example@example.com&local=true'
     ],
     [
       'getUsersFromEmailList',
       ['example@example.com,example@example.org', true],
       'get',
-      '/pod/v3/users?email=example@example.com,example@example.org&local=true',
+      '/pod/v3/users?email=example@example.com,example@example.org&local=true'
     ],
     ['getUsersFromIdList', [1234, true], 'get', '/pod/v3/users?uid=1234&local=true'],
     [
       'searchUsers',
       ['query', true, 10, 100, 'filter'],
       'post',
-      '/pod/v1/user/search?local=true&skip=10&limit=100',
+      '/pod/v1/user/search?local=true&skip=10&limit=100'
     ],
 
     // PresenceClient
     ['getUserPresence', ['abc123'], 'get', '/pod/v3/user/abc123/presence?local=false'],
     ['setPresence', ['status'], 'post', '/pod/v2/user/presence'],
-    ['registerInterestExtUser', [], 'post', '/pod/v1/user/presence/register'],
+    ['registerInterestExtUser', [], 'post', '/pod/v1/user/presence/register']
   ])('#%s', (methodName, args, verb, path) => {
     const host = path.substr(0, 6) === '/agent' ? mockConfig.agentHost : mockConfig.podHost
 
     it('handles success', async () => {
       nock(`https://${host}`)
-      [verb](path)
+        [verb](path)
         .reply(200, '{"status":"OK"}')
 
       await expect(SymBotClient[methodName](...args)).resolves.toEqual({
-        status: 'OK',
+        status: 'OK'
       })
 
       expect(https.request.mock.calls).toMatchSnapshot()
@@ -157,11 +157,11 @@ describe('SymBotClient', () => {
 
     it('handles failure', () => {
       nock(`https://${host}`)
-      [verb](path)
+        [verb](path)
         .replyWithError('Oh no')
 
       return expect(SymBotClient[methodName](...args)).rejects.toEqual({
-        status: 'error',
+        status: 'error'
       })
     })
   })
@@ -174,7 +174,6 @@ describe('SymBotClient', () => {
       // call bound handler function
       feed.on.mock.calls[0][1]('hello')
       expect(messageHandler).toHaveBeenCalledWith('MESSAGE_RECEIVED', 'hello')
-
       expect(feed.start).toHaveBeenCalledWith(undefined)
     })
 

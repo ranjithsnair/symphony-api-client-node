@@ -8,7 +8,7 @@ describe('Request helper', () => {
   it('handles JSON response', async () => {
     nock('https://example.com')
       .get('/test')
-      .reply(200, '{"test":"body"}')
+      .reply(200, '{'test':'body'}')
     const body = await request({ host: 'example.com', path: '/test' })
     expect(body).toEqual({ test: 'body' })
   })
@@ -39,7 +39,7 @@ describe('Request helper', () => {
     const form = new FormData()
     form.append('test', 'value')
     nock('https://example.com')
-      .post('/test', /\r\nContent-Disposition: form-data; name="test"\r\n\r\nvalue\r\n---/)
+      .post('/test', /\r\nContent-Disposition: form-data; name='test'\r\n\r\nvalue\r\n---/)
       .reply(200, '')
 
     const responseBody = await request(
@@ -95,7 +95,7 @@ describe('Request helper', () => {
   it.skip('rejects on HTTP errors', () => {
     nock('https://example.com')
       .get('/test')
-      .reply(400, '{"test":"body"}')
+      .reply(400, '{'test':'body'}')
 
     return expect(request({ host: 'example.com', path: '/test' })).rejects.toEqual({
       status: 'error',
